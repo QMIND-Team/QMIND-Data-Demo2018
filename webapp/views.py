@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 
 import json
+import ruamel.yaml as yaml
 import pickle
 import decimal
 import os.path
@@ -11,6 +12,7 @@ from sklearn import tree
 from json import JSONEncoder
 from bson import ObjectId
 import logging
+import io
 from pymongo import MongoClient
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -29,8 +31,8 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 D = decimal.Decimal
 ingredientsPath = os.path.join(BASE, "ingredients_list.json")
 recipesPath = os.path.join(BASE, "recipes.json")
-ingredients = json.load(open(ingredientsPath))['ingredients_list']
-recipes = json.load(open(recipesPath))['recipes']    # Creating dictionaries with the necessary data
+ingredients = json.load(io.open(ingredientsPath, 'r',encoding='utf-8'))['ingredients_list']
+recipes = json.load(io.open(recipesPath,'r', encoding='utf-8'))['recipes']    # Creating dictionaries with the necessary data
 
 ingredientsList = []
 for key in sorted(list(ingredients.keys())):
@@ -44,11 +46,20 @@ volume = ['tablespoon', 'cup', 'pinch', 'quart']
 volume_mes = [3, 48, 0.0625, 192]
 mes_list = ["n/a", "can", "bag", "bar", "clove", "packet", "ounce", "loaf", "loaves", "package", "teaspoon", "square",
             "container"]
+categories_list = ['Desserts', 'World Cuisine', 'Breakfast and Brunch', 'Bread', 'Side Dish', 'Recipes', 'Meat and Poultry', 'Trusted Brands: Recipes and Tips', 'Everyday Cooking', 'Salad', 'Main Dish', 'Soups, Stews and Chili', 'Appetizers and Snacks', 'Pasta and Noodles', 'Drinks', 'Ingredients', 'Healthy Recipes', 'Seafood', 'Holidays and Events', 'Fruits and Vegetables']
+
+
 
 features = []
 labels = []
-picklePath = os.path.join(BASE, "save.pkl")
-clf = pickle.load(open(picklePath, "rb"))
+labels2 = []
+#clf1 = tree.DecisionTreeClassifier()
+#clf2 = tree.DecisionTreeClassifier()
+picklePath1 = os.path.join(BASE, "save1.pkl")
+picklePath2 = os.path.join(BASE, "save2.pkl")
+clf1 = pickle.load(open(picklePath1, 'rb'))
+clf2 = pickle.load(open(picklePath2, 'rb'))
+#clf = pickle.load(open(picklePath, "rb"))
 
 def recipe_to_data(recipe):
     array = [0] * len(ingredients) *3
@@ -87,8 +98,21 @@ def init(n):
     for i in range(0, n):
                 features.append(recipe_to_data(recipes[i]))
                 labels.append(round(recipes[i]['rating']*10))
-init(5000)
-client = MongoClient()
+                labels2.append(categories_list.index(recipes[i]['category']))
+#init(5000)
+#clf1.fit(features, labels)
+#clf2.fit(features, labels2)
+
+#pickle.dump(clf1, open('save1.pkl', 'wb'))
+#pickle.dump(clf2, open('save2.pkl', 'wb'))
+#client = MongoClient()
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
 
 class Recipe(APIView):
     parser_classes = (JSONParser,)
@@ -110,7 +134,8 @@ class Recipe(APIView):
         for obj in query:
             obj['quantity'] = float(obj['quantity'])
         recipe = {'ingredients': query}
-        output = clf.predict([recipe_to_data(recipe)])
+        output = list(clf1.predict([recipe_to_data(recipe)]))
+        output.append(categories_list[list(clf2.predict([recipe_to_data(recipe)]))[0]])
         return Response(output)
 
 def index(request):

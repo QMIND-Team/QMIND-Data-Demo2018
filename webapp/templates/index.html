@@ -143,10 +143,10 @@
       contentType:"application/json; charset=utf-8",
       dataType:"json",
       success: function(data){
-        console.log(data[0])
+        console.log(data)
         var result = document.createElement('div')
         result.class = 'card-block'
-        result.innerHTML = '<h4>&nbsp;Result: </h4> &nbsp;&nbsp;'+data[0]/10.0+' Stars <br /><hr />'
+        result.innerHTML = '<h4>&nbsp;<i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;Result: </h4> &nbsp;&nbsp;<strong>Rating: </strong>'+data[0]/10.0+' Stars, <strong>Category: </strong>'+data[1]+'<br /><hr />'
         document.getElementById("results").prepend(result)
       }
     })
