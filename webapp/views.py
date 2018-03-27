@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 
 import json
-import ruamel.yaml as yaml
 import pickle
 import decimal
 import os.path
@@ -53,19 +52,15 @@ categories_list = ['Desserts', 'World Cuisine', 'Breakfast and Brunch', 'Bread',
 features = []
 labels = []
 labels2 = []
-#clf1 = tree.DecisionTreeClassifier()
-#clf2 = tree.DecisionTreeClassifier()
 picklePath1 = os.path.join(BASE, "save1.pkl")
 picklePath2 = os.path.join(BASE, "save2.pkl")
 clf1 = pickle.load(open(picklePath1, 'rb'))
 clf2 = pickle.load(open(picklePath2, 'rb'))
-#clf = pickle.load(open(picklePath, "rb"))
 
 def recipe_to_data(recipe):
     array = [0] * len(ingredients) *3
     for i in recipe['ingredients']:
             num = list(ingredients.keys()).index(i['name'])
-            #print 'The index of the ingredient is ' + str(num*3)
             raw_quant = i['quantity']
             if type(raw_quant) == type('test'):
                 quant = 1 if 'n/a' in raw_quant.lower() else raw_quant
@@ -99,13 +94,6 @@ def init(n):
                 features.append(recipe_to_data(recipes[i]))
                 labels.append(round(recipes[i]['rating']*10))
                 labels2.append(categories_list.index(recipes[i]['category']))
-#init(5000)
-#clf1.fit(features, labels)
-#clf2.fit(features, labels2)
-
-#pickle.dump(clf1, open('save1.pkl', 'wb'))
-#pickle.dump(clf2, open('save2.pkl', 'wb'))
-#client = MongoClient()
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
