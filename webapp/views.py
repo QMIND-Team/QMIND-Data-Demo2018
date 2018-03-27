@@ -47,8 +47,8 @@ mes_list = ["n/a", "can", "bag", "bar", "clove", "packet", "ounce", "loaf", "loa
 
 features = []
 labels = []
-clf = tree.DecisionTreeClassifier()
-
+picklePath = os.path.join(BASE, "save.pkl")
+clf = pickle.load(open(picklePath, "rb"))
 
 def recipe_to_data(recipe):
     array = [0] * len(ingredients) *3
@@ -88,16 +88,7 @@ def init(n):
                 features.append(recipe_to_data(recipes[i]))
                 labels.append(round(recipes[i]['rating']*10))
 init(5000)
-clf.fit(features, labels)
-
 client = MongoClient()
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
-
 
 class Recipe(APIView):
     parser_classes = (JSONParser,)
@@ -121,7 +112,6 @@ class Recipe(APIView):
         recipe = {'ingredients': query}
         output = clf.predict([recipe_to_data(recipe)])
         return Response(output)
-        #return Response({'message': request.POST.get("title", "")})
 
 def index(request):
     return render(request, 'index.html')
