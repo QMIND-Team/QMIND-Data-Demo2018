@@ -70,10 +70,8 @@
 <script>
   ingredientNames = []
   $.get('http://localhost:8000/recipe', function(data){
-    console.log(data)
     for(var i in data){
       ingredientNames.push(data[i]['name'])
-      console.log(data[i]['name'])
       var option = document.createElement("option")
       option.value = data[i]['name']
       document.getElementById("ingredients").appendChild(option)
@@ -136,8 +134,6 @@
       })
     }
     console.log('Go!')
-    console.log(ingredientNames)
-    console.log(ingredients)
     if(isInMulti(ingredientNames, ingredients) && validNums(ingredients)){
       $.ajax({
         url:'http://localhost:8000/recipe/',
