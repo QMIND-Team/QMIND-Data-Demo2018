@@ -68,10 +68,11 @@
 
 </html>
 <script>
-
+  ingredientNames = []
   $.get('http://localhost:8000/recipe', function(data){
     console.log(data)
     for(var i in data){
+      ingredientNames.push(data[i]['name'])
       console.log(data[i]['name'])
       var option = document.createElement("option")
       option.value = data[i]['name']
@@ -135,21 +136,53 @@
       })
     }
     console.log('Go!')
-
-    $.ajax({
-      url:'http://localhost:8000/recipe/',
-      type:"POST",
-      data:JSON.stringify(ingredients),
-      contentType:"application/json; charset=utf-8",
-      dataType:"json",
-      success: function(data){
-        console.log(data)
-        var result = document.createElement('div')
-        result.class = 'card-block'
-        result.innerHTML = '<h4>&nbsp;<i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;Result: </h4> &nbsp;&nbsp;<strong>Rating: </strong>'+data[0]/10.0+' Stars, <strong>Category: </strong>'+data[1]+'<br /><hr />'
-        document.getElementById("results").prepend(result)
-      }
-    })
+    console.log(ingredientNames)
+    console.log(ingredients)
+    if(isInMulti(ingredientNames, ingredients) && validNums(ingredients)){
+      $.ajax({
+        url:'http://localhost:8000/recipe/',
+        type:"POST",
+        data:JSON.stringify(ingredients),
+        contentType:"application/json; charset=utf-8",
+        dataType:"json",
+        success: function(data){
+          console.log(data)
+          var result = document.createElement('div')
+          result.class = 'card-block'
+          result.innerHTML = '<h4>&nbsp;<i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;Result: </h4> &nbsp;&nbsp;<strong>Rating: </strong>'+data[0]/10.0+' Stars, <strong>Category: </strong>'+data[1]+'<br /><hr />'
+          document.getElementById("results").prepend(result)
+        }
+      })
+    }
+    else if (!validNums(ingredients)){
+      alert('All measurements must be valid')
+    }
+    else{
+      alert('All ingredients must be valid')
+    }
   }
 
+  var isIn = function(array, key){
+    for(var i in array){
+      if(new String(array[i]).valueOf() == new String(key.name).valueOf())
+        return true
+    }
+    return false
+  }
+
+  var isInMulti = function(array, keyArray){
+    for(var i in keyArray){
+      if(!isIn(array, keyArray[i]))
+        return false
+    }
+    return true
+  }
+
+  var validNums = function(array){
+    for(var i in array){
+      if(typeof array[i].quantity !== typeof 0 && typeof array[i].quantity !== typeof 0)
+        return false
+    }
+    return true
+  }
 </script>
