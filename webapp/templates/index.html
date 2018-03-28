@@ -128,7 +128,7 @@
     for (var i = 0; i<values.length; i+=3){
       ingredients.push({
         name:values[i].value,
-        quantity:values[i+1].value,
+        quantity:parseFloat(values[i+1].value).toString(),
         measurement: values[i+2].value,
         required: checkboxes[i/3].checked
       })
@@ -176,8 +176,9 @@
 
   var validNums = function(array){
     for(var i in array){
-      if(typeof array[i].quantity !== typeof 0 && typeof array[i].quantity !== typeof 0)
-        return false
+      if(isNaN(parseFloat(array[i].quantity))){
+          return false
+        }
     }
     return true
   }
